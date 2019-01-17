@@ -13,8 +13,8 @@ export default class DiscussionSection {
         $scope.AttachmentsService = AttachmentsService;
         $scope.CaseService = CaseService;
         $scope.securityService = securityService;
-        $scope.ie8 = window.ie8;
-        $scope.ie9 = window.ie9;
+        // $scope.ie8 = window.ie8;
+        // $scope.ie9 = window.ie9;
         $scope.noteCharactersMax = 255;
         $scope.noteCharactersLeft = $scope.noteCharactersMax;
         $scope.EDIT_CASE_CONFIG = EDIT_CASE_CONFIG;
@@ -36,6 +36,11 @@ export default class DiscussionSection {
                 sortOrder: 'ASC'
             }
         ];
+        $scope.getOrderedDiscussionElements = () => {
+            var sorted = orderBy(DiscussionService.discussionElements, "sortModifiedDate");
+            var ordered = $scope.commentSortOrder ? reverse(sorted) : sorted;
+            return filter(ordered, (e) => (!e.draft))
+        }
         $scope.DiscussionService = DiscussionService;
         // $scope.PaginationService = PaginationService;
 
@@ -91,12 +96,6 @@ export default class DiscussionSection {
             }, delay || 150);
         };
 
-        $scope.getOrderedDiscussionElements = () => {
-            var sorted = orderBy(DiscussionService.discussionElements, "sortModifiedDate");
-            var ordered = $scope.commentSortOrder ? reverse(sorted) : sorted;
-            return filter(ordered, (e) => (!e.draft))
-        }
-
         $scope.scrollToComment = (commentId, delay) => {
             if (commentId) {
                 //let pageSize = $scope.PaginationService.discussionSection.pageSize;
@@ -107,7 +106,7 @@ export default class DiscussionSection {
                 // let currentPageNumber = mod == 0 ? (division || 1) : (division + 1)
                 // if (commentIndex > -1 && currentPageNumber) {
                 //    $scope.PaginationService.discussionSection.currentPageNumber = currentPageNumber;
-                    scroll(commentId, delay);
+                scroll(commentId, delay);
                 // }
             }
         }
@@ -402,6 +401,14 @@ export default class DiscussionSection {
             $scope.resetSearch();
             $scope.scrollToComment(commentId);
             $scope.showJumpToCommentId = null;
+        }
+
+        $scope.isIE = () => {
+            return window.ie8 || window.ie9;
+        }
+
+        $scope.isNotIE = () => {
+            return !window.ie8 && !window.ie9;
         }
     }
 }

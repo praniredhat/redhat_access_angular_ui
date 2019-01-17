@@ -2,8 +2,8 @@ ul#tab_list.nav.nav-tabs(role="tablist")
     li(ng-class='{"active": discussion}')
         a(ng-click='toggleDiscussionClick()', data-toggle="tab") {{'Case Discussion'|translate}}
     li(ng-class='{"active": attachments}')
-        a(ng-click='toggleAttachments()',  data-toggle="tab", ng-hide="AttachmentsService.originalAttachments.length === 0") {{'All Attachments'|translate}}
-    li(ng-class='{"active": notes}', ng-hide="securityService.loginStatus.authedUser.is_internal")
+        a(ng-click='toggleAttachments()',  data-toggle="tab", ng-if="AttachmentsService.originalAttachments.length !== 0") {{'All Attachments'|translate}}
+    li(ng-class='{"active": notes}', ng-if="!securityService.loginStatus.authedUser.is_internal")
         a(ng-click='toggleNotes()', data-toggle="tab") {{'Private Notes'|translate}}
     li(ng-class='{"active": bugzillas}', ng-if="securityService.loginStatus.authedUser.is_internal || CaseService.kase.bugzillas.bugzilla.length > 0")
         a(ng-click='toggleBugzillas()', data-toggle="tab") {{'Bugzilla Tickets'|translate}}
@@ -13,7 +13,7 @@ ul#tab_list.nav.nav-tabs(role="tablist")
         a(ng-click='toggleCaseSummary()', data-toggle="tab") {{'Case Summary'|translate}}
 .tab-content
     #pane1.tab-pane(ng-class='{"active": discussion}')
-        .row.row-very-short(ng-hide="DiscussionService.discussionElements.length===0")
+        .row.row-very-short(ng-if="DiscussionService.discussionElements.length!==0")
             .col-sm-7
                 label {{'Sort by'|translate}}&nbsp;&nbsp;
                 select#rha-comment-sort(chosen,
@@ -36,85 +36,85 @@ ul#tab_list.nav.nav-tabs(role="tablist")
                         //- span(ng-if="DiscussionService.allDiscussionElements().length > 0") ifing {{PaginationService.firstItemNumberifnOnThePage('discussionSection', DiscussionService.discussionElements.length)}}-{{PaginationService.lastItemNumberifnOnThePage('discussionSection', DiscussionService.discussionElements.length)}} of {{DiscussionService.discussionElements.length}} results
                     .col-sm-8
                         //- pagination(ng-if="discussion", current-page-number="PaginationService.discussionSection.currentPageNumber" datalength="DiscussionService.discussionElements.length", page-size="PaginationService.discussionSection.pageSize", set-current-page-number="setCurrentPageNumberForDS(pageNumber)", set-page-size="PaginationService.setPageSize('discussionSection', pageSize)")
-                .discussion-element(id="{{element.id}}", ng-repeat="element in getOrderedDiscussionElements()", ng-if='!element.draft', ng-mouseenter='mouseOver(element)', ng-mouseleave='mouseOut(element)')
-                    article.comment.article-comment(ng-if="!element.file_name && element.comment_type !== 'chat' && !element.originating_system && (element.public === undefined || element.public === true)")
+                .discussion-element(id="{{::element.id}}", ng-repeat="element in DiscussionService.discussionElements track by element.id", ng-if='!element.draft', ng-mouseenter='mouseOver(element)', ng-mouseleave='mouseOut(element)')
+                    article.comment.article-comment(ng-if="DiscussionService.isPublicComment(element)")
                         i.fa.fa-comments-o
                         h4.meta 
-                            {{'Message'|translate}}&nbsp;({{element.created_by_type}})
-                            a.pull-right(ng-if="ifJumpToCommentId == element.id" ng-click="jumpToComment(element.id)", ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{element.id}}') Jump to comment
+                            {{'Message'|translate}}&nbsp;({{::element.created_by_type}})
+                            a.pull-right(ng-if="ifJumpToCommentId == element.id" ng-click="jumpToComment(element.id)", ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{::element.id}}') Jump to comment
                         .byline
-                            author {{element.last_modified_by}} {{'on'|translate}}&nbsp;
-                            date {{element.last_modified_date}} {{'at'|translate}}&nbsp;
-                            date {{element.last_modified_time}}
+                            author {{::element.last_modified_by}} {{'on'|translate}}&nbsp;
+                            date {{::element.last_modified_date}} {{'at'|translate}}&nbsp;
+                            date {{::element.last_modified_time}}
                         .pre-wrap
-                            span(ng-if="ie8 || ie9", style='word-wrap: normal; word-break: normal;') {{element.text}}
-                            .content(ng-if="!ie8 && !ie9", ng-bind-html="parseCommentHtml(element)")
+                            span(ng-if="isIE()", style='word-wrap: normal; word-break: normal;') {{::element.text}}
+                            .content(ng-if="isNotIE()", ng-bind-html="parseCommentHtml(element)")
                             .reply.text-right
                                 span.pull-left.vote-buttons(ng-if='!securityService.loginStatus.authedUser.is_internal && !COMMON_CONFIG.isGS4')
                                     a.fa(ng-class="element.feedback === 1 ? 'fa-thumbs-up active' : 'fa-thumbs-o-up'" ng-click='applyCommentFeedback(element, 1)', uib-tooltip='{{"Thumbs Up"|translate}}', tooltip-placement="top", tooltip-append-to-body="true")
                                     a.fa(ng-class="element.feedback === 0 ? 'fa-thumbs-down active' : 'fa-thumbs-o-down'" ng-click='applyCommentFeedback(element, 0)', uib-tooltip='{{"Thumbs Down"|translate}}', tooltip-placement="top", tooltip-append-to-body="true")
-                                a.commentReply(ng-click='commentReply(element,(ie8 || ie9))', href='') {{'Reply'|translate}}
-                                a.ml-5.glyphicon.glyphicon-link(ng-click='CaseService.scrollToComment(element.id)' ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{element.id}}')
-                    article.comment.article-private-comment(ng-if="!element.file_name && element.comment_type !== 'chat' && !element.originating_system && element.public !== undefined && !element.public")
+                                a.commentReply(ng-click='commentReply(element,(isIE()))', href='') {{'Reply'|translate}}
+                                a.ml-5.glyphicon.glyphicon-link(ng-click='CaseService.scrollToComment(element.id)' ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{::element.id}}')
+                    article.comment.article-private-comment(ng-if="DiscussionService.isPrivateComment(element)")
                         i.fa.fa-comments-o
-                        h4.meta {{'Private Message'|translate}}&nbsp;({{element.created_by_type}})
-                            a.pull-right(ng-if="ifJumpToCommentId == element.id" ng-click="jumpToComment(element.id)", ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{element.id}}') Jump to comment
+                        h4.meta {{'Private Message'|translate}}&nbsp;({{::element.created_by_type}})
+                            a.pull-right(ng-if="ifJumpToCommentId == element.id" ng-click="jumpToComment(element.id)", ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{::element.id}}') Jump to comment
                         
                         .byline
-                            author {{element.last_modified_by}} {{'on'|translate}}&nbsp;
-                            date {{element.published_date}} {{'at'|translate}}&nbsp;
-                            date {{element.published_time}}
+                            author {{::element.last_modified_by}} {{'on'|translate}}&nbsp;
+                            date {{::element.published_date}} {{'at'|translate}}&nbsp;
+                            date {{::element.published_time}}
                         .pre-wrap
-                            span(ng-if="ie8 || ie9", style='word-wrap: normal; word-break: normal;') {{element.text}}
-                            .content(ng-if="!ie8 && !ie9", ng-bind-html="parseCommentHtml(element)")
+                            span(ng-if="isIE()", style='word-wrap: normal; word-break: normal;') {{::element.text}}
+                            .content(ng-if="isNotIE()", ng-bind-html="parseCommentHtml(element)")
                             .reply.text-right
-                                a.commentReply(ng-click='commentReply(element,(ie8 || ie9))', href='') {{'Reply'|translate}}
-                                a.ml-5.glyphicon.glyphicon-link(ng-click='CaseService.scrollToComment(element.id)' ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{element.id}}')
+                                a.commentReply(ng-click='commentReply(element,(isIE()))', href='') {{'Reply'|translate}}
+                                a.ml-5.glyphicon.glyphicon-link(ng-click='CaseService.scrollToComment(element.id)' ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{::element.id}}')
 
-                    article.comment.article-attachment(ng-if="element.file_name && !element.originating_system")
+                    article.comment.article-attachment(ng-if="DiscussionService.isAttachment(element)")
                         i.fa.fa-paperclip
                         h4.meta {{'Attachment'|translate}}
 
                         .byline
-                            author {{element.last_modified_by ? element.last_modified_by : element.modifiedBy}} {{'on'|translate}}&nbsp;
-                            date {{element.published_date}}&nbsp;
+                            author {{::element.last_modified_by ? element.last_modified_by : element.modifiedBy}} {{'on'|translate}}&nbsp;
+                            date {{::element.published_date}}&nbsp;
                             span {{'at'|translate}}&nbsp;
-                            time {{element.published_time}}
+                            time {{::element.published_time}}
                         .pre-wrap
                             a(ng-if="!isCertification() && AttachmentsService.isAwsAttachment(element, AttachmentsService.s3EnabledForAccount)" ng-click="downloadS3Attachment(element)")
                                 .fa.fa-file-image-o.file-upload
-                                span {{element.file_name}} ({{element.length ? element.length : element.size | bytes}})&nbsp;
-                            a(ng-if="isCertification() || !AttachmentsService.isAwsAttachment(element, AttachmentsService.s3EnabledForAccount)" href="{{element.link}}" download="download")
+                                span {{::element.file_name}} ({{::element.length ? element.length : element.size | bytes}})&nbsp;
+                            a(ng-if="isCertification() || !AttachmentsService.isAwsAttachment(element, AttachmentsService.s3EnabledForAccount)" href="{{::element.link}}" download="download")
                                 .fa.fa-file-image-o.file-upload
-                                span {{element.file_name}} ({{element.length ? element.length : element.size | bytes}})&nbsp;
+                                span {{::element.file_name}} ({{::element.length ? element.length : element.size | bytes}})&nbsp;
                             span.fa.fa-close(type='button', style='cursor: pointer;', ng-click='deleteAttachment(element)')
-                            div(ng-if="element.checksum") {{'SHA-256:'|translate}}&nbsp;{{element.checksum}}
-                            .description.margin-top-short(ng-if="element.description") {{element.description}}
+                            div(ng-if="element.checksum") {{'SHA-256:'|translate}}&nbsp;{{::element.checksum}}
+                            .description.margin-top-short(ng-if="element.description") {{::element.description}}
 
-                    article.comment.article-chat(ng-if="element.comment_type === 'chat'")
+                    article.comment.article-chat(ng-if="DiscussionService.isChat(element)")
                         i.fa.fa-file-text-o
                         h4.meta(ng-if="element.comment_type === 'chat'") {{'Transcript of chat'|translate}}
                         .byline
                             span {{'between'|translate}}&nbsp;
-                            author {{element.agent_name}}&nbsp;
+                            author {{::element.agent_name}}&nbsp;
                             span {{'and'|translate}}&nbsp;
-                            author {{element.visitor_name}}&nbsp;
-                            date {{element.last_modified_date}}&nbsp;
+                            author {{::element.visitor_name}}&nbsp;
+                            date {{::element.last_modified_date}}&nbsp;
                             span {{'at'|translate}}&nbsp;
-                            time {{element.last_modified_time}}
+                            time {{::element.last_modified_time}}
                         .pre-wrap(ng-if="element.comment_type === 'chat'", ng-bind-html="parseCommentHtml(element)")
-                    article.comment.article-external-updates(ng-if="element.originating_system")
+                    article.comment.article-external-updates(ng-if="DiscussionService.hasOriginatingSystem(element)")
                         i.fa.fa-comments-o
-                        h4.meta {{element.originating_system}}
+                        h4.meta {{::element.originating_system}}
                             span(ng-if="element.visibility==='Partner Only'") {{' - Private'|translate}}
                         .byline
-                            author {{element.created_by}} {{'on'|translate}}&nbsp;
-                            date {{element.created_date}}&nbsp;
+                            author {{::element.created_by}} {{'on'|translate}}&nbsp;
+                            date {{::element.created_date}}&nbsp;
                             span {{'at'|translate}}&nbsp;
-                            time {{element.created_time}}
+                            time {{::element.created_time}}
                         .pre-wrap
-                            span(ng-if="ie8 || ie9", style='word-wrap: normal; word-break: normal;') {{element.body}}
-                            .content(ng-if="!ie8 && !ie9", ng-bind-html="parseCommentHtml(element)")
+                            span(ng-if="isIE()", style='word-wrap: normal; word-break: normal;') {{::element.body}}
+                            .content(ng-if="isNotIE()", ng-bind-html="parseCommentHtml(element)")
                 #bottom-discussion-section
                 //- pagination(ng-if="discussion", current-page-number="PaginationService.discussionSection.currentPageNumber" datalength="DiscussionService.discussionElements.length", page-size="PaginationService.discussionSection.pageSize", set-current-page-number="setCurrentPageNumberForDS(pageNumber)", set-page-size="PaginationService.setPageSize('discussionSection', pageSize)")
                 //- pagination(ng-if="discussion", default-current-page-number="defaultCurrentPageNumber", current-page-prop="currentPageProp",  datalength="DiscussionService.discussionElements.length", setdata="getPaginationData(pageSize, currentPage)")
@@ -129,30 +129,30 @@ ul#tab_list.nav.nav-tabs(role="tablist")
                 //- pagination(ng-if="attachments", current-page-prop="currentPage", , datalength="DiscussionService.attachments.length", setdata="getPaginationData(pageSize, currentPage)")
         .row.row-very-short.case-discussion
             .col-xs-12
-                .discussion-element(id="{{attachment.id}}", ng-repeat="attachment in DiscussionService.attachments | orderBy:'sortModifiedDate':'reverse'", ng-mouseenter='mouseOver(attachment)', ng-mouseleave='mouseOut(attachment)')
+                .discussion-element(id="{{::attachment.id}}", ng-repeat="attachment in DiscussionService.attachments track by attachment.id | orderBy:'sortModifiedDate':'reverse'", ng-mouseenter='mouseOver(attachment)', ng-mouseleave='mouseOut(attachment)')
                     article.comment.article-attachment(ng-if="attachment.file_name") 
                         i.fa.fa-paperclip
                         h4.meta {{'Attachment'|translate}}
 
                         .byline
-                            author {{attachment.last_modified_by}} {{'on'|translate}} &nbsp;
-                            date {{attachment.published_date}} &nbsp;
+                            author {{::attachment.last_modified_by}} {{'on'|translate}} &nbsp;
+                            date {{::attachment.published_date}} &nbsp;
                             span {{'at'|translate}} &nbsp;
-                            time {{attachment.published_time}}
+                            time {{::attachment.published_time}}
                         .pre-wrap
                             a(ng-if="!isCertification() && AttachmentsService.isAwsAttachment(attachment, AttachmentsService.s3EnabledForAccount)" ng-click="downloadS3Attachment(attachment)")
                                 .fa.fa-file-image-o.file-upload
-                                span {{attachment.file_name}} ({{attachment.length ? attachment.length : attachment.size | bytes}})&nbsp;
-                            a(ng-if="isCertification() || !AttachmentsService.isAwsAttachment(attachment, AttachmentsService.s3EnabledForAccount)" href="{{attachment.link}}" download="download")
+                                span {{::attachment.file_name}} ({{::attachment.length ? attachment.length : attachment.size | bytes}})&nbsp;
+                            a(ng-if="isCertification() || !AttachmentsService.isAwsAttachment(attachment, AttachmentsService.s3EnabledForAccount)" href="{{::attachment.link}}" download="download")
                                 .fa.fa-file-image-o.file-upload
-                                span {{attachment.file_name}} ({{attachment.length ? attachment.length : attachment.size | bytes}})&nbsp;
+                                span {{::attachment.file_name}} ({{::attachment.length ? attachment.length : attachment.size | bytes}})&nbsp;
                             span.fa.fa-close(type='button', style='cursor: pointer;', ng-click='deleteAttachment(attachment)')
-                            div(ng-if='attachment.checksum') {{'SHA-256:'|translate}}&nbsp;{{attachment.checksum}}
-                            .description.margin-top-short(ng-if="attachment.description") {{attachment.description}}
+                            div(ng-if='attachment.checksum') {{'SHA-256:'|translate}}&nbsp;{{::attachment.checksum}}
+                            .description.margin-top-short(ng-if="attachment.description") {{::attachment.description}}
                 #bottom-attachments-section
                 //- pagination(ng-if="attachments", current-page-number="PaginationService.attachmentsSection.currentPageNumber" datalength="DiscussionService.attachments.length", page-size="PaginationService.attachmentsSection.pageSize", set-current-page-number="setCurrentPageNumberForAS(pageNumber)", set-page-size="PaginationService.setPageSize('attachmentsSection', pageSize)")
                 //- pagination(ng-if="attachments", datalength="DiscussionService.attachments.length", setdata="getPaginationData(pageSize, currentPage)" current-page-prop="currentPage", )
-    #pane3.tab-pane(ng-hide="securityService.loginStatus.authedUser.is_internal", ng-class='{"active": notes}')
+    #pane3.tab-pane(ng-if="!securityService.loginStatus.authedUser.is_internal", ng-class='{"active": notes}')
         form(name='notesForm')
             div
                 label(for='rha-case-notes') {{'Notes:'|translate}}

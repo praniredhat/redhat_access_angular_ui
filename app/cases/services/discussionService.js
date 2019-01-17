@@ -58,6 +58,10 @@ export default class DiscussionService {
             return element.file_name && !element.originating_system;
         }
 
+        this.hasOriginatingSystem = (element) => {
+            return element.originating_system;
+        }
+
         this.isChat = (element) => {
             return element.comment_type === 'chat';
         }
