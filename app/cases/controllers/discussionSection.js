@@ -37,7 +37,7 @@ export default class DiscussionSection {
             }
         ];
         $scope.DiscussionService = DiscussionService;
-        $scope.PaginationService = PaginationService;
+        // $scope.PaginationService = PaginationService;
 
         $scope.$on(CASE_EVENTS.searchSubmit, function () {
             $location.search('commentId', null);
@@ -69,14 +69,14 @@ export default class DiscussionSection {
         }
 
         $scope.setCurrentPageNumberForDS = (currentPageNumber) => {
-            $scope.scrollForPagination($scope.PaginationService.discussionSection.currentPageNumber, currentPageNumber);
-            $scope.PaginationService.discussionSection.currentPageNumber = currentPageNumber;
+            //$scope.scrollForPagination($scope.PaginationService.discussionSection.currentPageNumber, currentPageNumber);
+            //$scope.PaginationService.discussionSection.currentPageNumber = currentPageNumber;
             $scope.onListChange();
         }
 
         $scope.setCurrentPageNumberForAS = (currentPageNumber) => {
-            $scope.scrollForPagination($scope.PaginationService.attachmentsSection.currentPageNumber, currentPageNumber);
-            $scope.PaginationService.attachmentsSection.currentPageNumber = currentPageNumber;
+            //$scope.scrollForPagination($scope.PaginationService.attachmentsSection.currentPageNumber, currentPageNumber);
+            //$scope.PaginationService.attachmentsSection.currentPageNumber = currentPageNumber;
             $scope.onListChange();
         }
 
@@ -99,16 +99,16 @@ export default class DiscussionSection {
 
         $scope.scrollToComment = (commentId, delay) => {
             if (commentId) {
-                let pageSize = $scope.PaginationService.discussionSection.pageSize;
-                let commentIndex = findIndex($scope.getOrderedDiscussionElements(), { id: commentId });
-                let commentNumber = commentIndex + 1;
-                let mod = (commentNumber % pageSize);
-                let division = Math.floor(commentNumber / pageSize);
-                let currentPageNumber = mod == 0 ? (division || 1) : (division + 1)
-                if (commentIndex > -1 && currentPageNumber) {
-                    $scope.PaginationService.discussionSection.currentPageNumber = currentPageNumber;
+                //let pageSize = $scope.PaginationService.discussionSection.pageSize;
+                // let commentIndex = findIndex($scope.getOrderedDiscussionElements(), { id: commentId });
+                // let commentNumber = commentIndex + 1;
+                // let mod = (commentNumber % pageSize);
+                // let division = Math.floor(commentNumber / pageSize);
+                // let currentPageNumber = mod == 0 ? (division || 1) : (division + 1)
+                // if (commentIndex > -1 && currentPageNumber) {
+                //    $scope.PaginationService.discussionSection.currentPageNumber = currentPageNumber;
                     scroll(commentId, delay);
-                }
+                // }
             }
         }
 
@@ -230,8 +230,8 @@ export default class DiscussionSection {
 
         $scope.doSearch = function () {
             DiscussionService.doSearch(SearchBoxService.searchTerm, $scope.attachments);
-            $scope.PaginationService.discussionSection.currentPageNumber = 1;
-            $scope.PaginationService.attachmentsSection.currentPageNumber = 1;
+            // $scope.PaginationService.discussionSection.currentPageNumber = 1;
+            // $scope.PaginationService.attachmentsSection.currentPageNumber = 1;
             $scope.showJumpToCommentId = null;
         };
 

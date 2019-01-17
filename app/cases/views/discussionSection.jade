@@ -33,10 +33,10 @@ ul#tab_list.nav.nav-tabs(role="tablist")
                 .row
                     .col-sm-4
                         rha-searchbox(placeholder='"Search Discussion"', class-name='"padding-searchbox"', ng-if="DiscussionService.allDiscussionElements().length > 0")
-                        span(ng-if="DiscussionService.allDiscussionElements().length > 0") Showing {{PaginationService.firstItemNumberShownOnThePage('discussionSection', DiscussionService.discussionElements.length)}}-{{PaginationService.lastItemNumberShownOnThePage('discussionSection', DiscussionService.discussionElements.length)}} of {{DiscussionService.discussionElements.length}} results
+                        //- span(ng-if="DiscussionService.allDiscussionElements().length > 0") Showing {{PaginationService.firstItemNumberShownOnThePage('discussionSection', DiscussionService.discussionElements.length)}}-{{PaginationService.lastItemNumberShownOnThePage('discussionSection', DiscussionService.discussionElements.length)}} of {{DiscussionService.discussionElements.length}} results
                     .col-sm-8
-                        pagination(ng-if="discussion", current-page-number="PaginationService.discussionSection.currentPageNumber" datalength="DiscussionService.discussionElements.length", page-size="PaginationService.discussionSection.pageSize", set-current-page-number="setCurrentPageNumberForDS(pageNumber)", set-page-size="PaginationService.setPageSize('discussionSection', pageSize)")
-                .discussion-element(id="{{element.id}}", ng-repeat="element in DiscussionService.discussionElements | orderBy:'sortModifiedDate':commentSortOrder | startFrom:(PaginationService.discussionSection.currentPageNumber-1)*PaginationService.discussionSection.pageSize | limitTo:PaginationService.discussionSection.pageSize", ng-if='!element.draft', ng-mouseenter='mouseOver(element)', ng-mouseleave='mouseOut(element)')
+                        //- pagination(ng-if="discussion", current-page-number="PaginationService.discussionSection.currentPageNumber" datalength="DiscussionService.discussionElements.length", page-size="PaginationService.discussionSection.pageSize", set-current-page-number="setCurrentPageNumberForDS(pageNumber)", set-page-size="PaginationService.setPageSize('discussionSection', pageSize)")
+                .discussion-element(id="{{element.id}}", ng-repeat="element in DiscussionService.discussionElements | orderBy:'sortModifiedDate':commentSortOrder", ng-if='!element.draft', ng-mouseenter='mouseOver(element)', ng-mouseleave='mouseOut(element)')
                     article.comment.article-comment(ng-if="!element.file_name && element.comment_type !== 'chat' && !element.originating_system && (element.public === undefined || element.public === true)")
                         i.fa.fa-comments-o
                         h4.meta 
@@ -116,20 +116,20 @@ ul#tab_list.nav.nav-tabs(role="tablist")
                             span(ng-if="ie8 || ie9", style='word-wrap: normal; word-break: normal;') {{element.body}}
                             .content(ng-if="!ie8 && !ie9", ng-bind-html="parseCommentHtml(element)")
                 #bottom-discussion-section
-                pagination(ng-if="discussion", current-page-number="PaginationService.discussionSection.currentPageNumber" datalength="DiscussionService.discussionElements.length", page-size="PaginationService.discussionSection.pageSize", set-current-page-number="setCurrentPageNumberForDS(pageNumber)", set-page-size="PaginationService.setPageSize('discussionSection', pageSize)")
+                //- pagination(ng-if="discussion", current-page-number="PaginationService.discussionSection.currentPageNumber" datalength="DiscussionService.discussionElements.length", page-size="PaginationService.discussionSection.pageSize", set-current-page-number="setCurrentPageNumberForDS(pageNumber)", set-page-size="PaginationService.setPageSize('discussionSection', pageSize)")
                 //- pagination(ng-if="discussion", default-current-page-number="defaultCurrentPageNumber", current-page-prop="currentPageProp",  datalength="DiscussionService.discussionElements.length", setdata="getPaginationData(pageSize, currentPage)")
     #pane2.tab-pane(ng-class='{"active": attachments}')
         #top-attachments-section
         .row
             .col-md-4
                 rha-searchbox(placeholder='"Search Attachments"', class-name='"padding-searchbox"', ng-if="AttachmentsService.originalAttachments.length > 0")
-                span(ng-if="AttachmentsService.originalAttachments.length > 0") Showing {{PaginationService.firstItemNumberShownOnThePage('attachmentsSection', DiscussionService.attachments.length)}}-{{PaginationService.lastItemNumberShownOnThePage('attachmentsSection', DiscussionService.attachments.length)}} of {{DiscussionService.attachments.length}} results
+                //- span(ng-if="AttachmentsService.originalAttachments.length > 0") Showing {{PaginationService.firstItemNumberShownOnThePage('attachmentsSection', DiscussionService.attachments.length)}}-{{PaginationService.lastItemNumberShownOnThePage('attachmentsSection', DiscussionService.attachments.length)}} of {{DiscussionService.attachments.length}} results
             .col-md-8
-                pagination(ng-if="attachments", current-page-number="PaginationService.attachmentsSection.currentPageNumber" datalength="DiscussionService.attachments.length", page-size="PaginationService.attachmentsSection.pageSize", set-current-page-number="setCurrentPageNumberForAS(pageNumber)", set-page-size="PaginationService.setPageSize('attachmentsSection', pageSize)")
+                //- pagination(ng-if="attachments", current-page-number="PaginationService.attachmentsSection.currentPageNumber" datalength="DiscussionService.attachments.length", page-size="PaginationService.attachmentsSection.pageSize", set-current-page-number="setCurrentPageNumberForAS(pageNumber)", set-page-size="PaginationService.setPageSize('attachmentsSection', pageSize)")
                 //- pagination(ng-if="attachments", current-page-prop="currentPage", , datalength="DiscussionService.attachments.length", setdata="getPaginationData(pageSize, currentPage)")
         .row.row-very-short.case-discussion
             .col-xs-12
-                .discussion-element(id="{{attachment.id}}", ng-repeat="attachment in DiscussionService.attachments | orderBy:'sortModifiedDate':'reverse' | startFrom:(PaginationService.attachmentsSection.currentPageNumber-1)*PaginationService.attachmentsSection.pageSize | limitTo:PaginationService.attachmentsSection.pageSize", ng-mouseenter='mouseOver(attachment)', ng-mouseleave='mouseOut(attachment)')
+                .discussion-element(id="{{attachment.id}}", ng-repeat="attachment in DiscussionService.attachments | orderBy:'sortModifiedDate':'reverse'", ng-mouseenter='mouseOver(attachment)', ng-mouseleave='mouseOut(attachment)')
                     article.comment.article-attachment(ng-if="attachment.file_name") 
                         i.fa.fa-paperclip
                         h4.meta {{'Attachment'|translate}}
@@ -150,7 +150,7 @@ ul#tab_list.nav.nav-tabs(role="tablist")
                             div(ng-if='attachment.checksum') {{'SHA-256:'|translate}}&nbsp;{{attachment.checksum}}
                             .description.margin-top-short(ng-show="attachment.description") {{attachment.description}}
                 #bottom-attachments-section
-                pagination(ng-if="attachments", current-page-number="PaginationService.attachmentsSection.currentPageNumber" datalength="DiscussionService.attachments.length", page-size="PaginationService.attachmentsSection.pageSize", set-current-page-number="setCurrentPageNumberForAS(pageNumber)", set-page-size="PaginationService.setPageSize('attachmentsSection', pageSize)")
+                //- pagination(ng-if="attachments", current-page-number="PaginationService.attachmentsSection.currentPageNumber" datalength="DiscussionService.attachments.length", page-size="PaginationService.attachmentsSection.pageSize", set-current-page-number="setCurrentPageNumberForAS(pageNumber)", set-page-size="PaginationService.setPageSize('attachmentsSection', pageSize)")
                 //- pagination(ng-if="attachments", datalength="DiscussionService.attachments.length", setdata="getPaginationData(pageSize, currentPage)" current-page-prop="currentPage", )
     #pane3.tab-pane(ng-hide="securityService.loginStatus.authedUser.is_internal", ng-class='{"active": notes}')
         form(name='notesForm')
