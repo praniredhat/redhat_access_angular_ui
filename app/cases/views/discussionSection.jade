@@ -5,7 +5,7 @@ ul#tab_list.nav.nav-tabs(role="tablist")
         a(ng-click='toggleAttachments()',  data-toggle="tab", ng-hide="AttachmentsService.originalAttachments.length === 0") {{'All Attachments'|translate}}
     li(ng-class='{"active": notes}', ng-hide="securityService.loginStatus.authedUser.is_internal")
         a(ng-click='toggleNotes()', data-toggle="tab") {{'Private Notes'|translate}}
-    li(ng-class='{"active": bugzillas}', ng-show="securityService.loginStatus.authedUser.is_internal || CaseService.kase.bugzillas.bugzilla.length > 0")
+    li(ng-class='{"active": bugzillas}', ng-if="securityService.loginStatus.authedUser.is_internal || CaseService.kase.bugzillas.bugzilla.length > 0")
         a(ng-click='toggleBugzillas()', data-toggle="tab") {{'Bugzilla Tickets'|translate}}
     li(ng-class='{"active": actionPlan}')
         a(ng-click='toggleActionPlan()', data-toggle="tab") {{'Action Plan'|translate}}
@@ -26,22 +26,22 @@ ul#tab_list.nav.nav-tabs(role="tablist")
             .col-xs-12
                 // Add Comment Section
                 div(rha-addcommentsection='', loading='loading.comments')
-        .spinner(ng-show="AttachmentsService.loading")
-        .row.row-very-short.case-discussion(ng-show="!AttachmentsService.loading")
+        .spinner(ng-if="AttachmentsService.loading")
+        .row.row-very-short.case-discussion(ng-if="!AttachmentsService.loading")
             .col-xs-12
                 #top-discussion-section
                 .row
                     .col-sm-4
-                        rha-searchbox(placeholder='"Search Discussion"', class-name='"padding-searchbox"', ng-if="DiscussionService.allDiscussionElements().length > 0")
-                        //- span(ng-if="DiscussionService.allDiscussionElements().length > 0") Showing {{PaginationService.firstItemNumberShownOnThePage('discussionSection', DiscussionService.discussionElements.length)}}-{{PaginationService.lastItemNumberShownOnThePage('discussionSection', DiscussionService.discussionElements.length)}} of {{DiscussionService.discussionElements.length}} results
+                        //- rha-searchbox(placeholder='"Search Discussion"', class-name='"padding-searchbox"', ng-if="DiscussionService.allDiscussionElements().length > 0")
+                        //- span(ng-if="DiscussionService.allDiscussionElements().length > 0") ifing {{PaginationService.firstItemNumberifnOnThePage('discussionSection', DiscussionService.discussionElements.length)}}-{{PaginationService.lastItemNumberifnOnThePage('discussionSection', DiscussionService.discussionElements.length)}} of {{DiscussionService.discussionElements.length}} results
                     .col-sm-8
                         //- pagination(ng-if="discussion", current-page-number="PaginationService.discussionSection.currentPageNumber" datalength="DiscussionService.discussionElements.length", page-size="PaginationService.discussionSection.pageSize", set-current-page-number="setCurrentPageNumberForDS(pageNumber)", set-page-size="PaginationService.setPageSize('discussionSection', pageSize)")
-                .discussion-element(id="{{element.id}}", ng-repeat="element in DiscussionService.discussionElements | orderBy:'sortModifiedDate':commentSortOrder", ng-if='!element.draft', ng-mouseenter='mouseOver(element)', ng-mouseleave='mouseOut(element)')
+                .discussion-element(id="{{element.id}}", ng-repeat="element in getOrderedDiscussionElements()", ng-if='!element.draft', ng-mouseenter='mouseOver(element)', ng-mouseleave='mouseOut(element)')
                     article.comment.article-comment(ng-if="!element.file_name && element.comment_type !== 'chat' && !element.originating_system && (element.public === undefined || element.public === true)")
                         i.fa.fa-comments-o
                         h4.meta 
                             {{'Message'|translate}}&nbsp;({{element.created_by_type}})
-                            a.pull-right(ng-if="showJumpToCommentId == element.id" ng-click="jumpToComment(element.id)", ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{element.id}}') Jump to comment
+                            a.pull-right(ng-if="ifJumpToCommentId == element.id" ng-click="jumpToComment(element.id)", ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{element.id}}') Jump to comment
                         .byline
                             author {{element.last_modified_by}} {{'on'|translate}}&nbsp;
                             date {{element.last_modified_date}} {{'at'|translate}}&nbsp;
@@ -58,7 +58,7 @@ ul#tab_list.nav.nav-tabs(role="tablist")
                     article.comment.article-private-comment(ng-if="!element.file_name && element.comment_type !== 'chat' && !element.originating_system && element.public !== undefined && !element.public")
                         i.fa.fa-comments-o
                         h4.meta {{'Private Message'|translate}}&nbsp;({{element.created_by_type}})
-                            a.pull-right(ng-if="showJumpToCommentId == element.id" ng-click="jumpToComment(element.id)", ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{element.id}}') Jump to comment
+                            a.pull-right(ng-if="ifJumpToCommentId == element.id" ng-click="jumpToComment(element.id)", ng-href='#/case/{{CaseService.kase.case_number}}?commentId={{element.id}}') Jump to comment
                         
                         .byline
                             author {{element.last_modified_by}} {{'on'|translate}}&nbsp;
@@ -81,15 +81,15 @@ ul#tab_list.nav.nav-tabs(role="tablist")
                             span {{'at'|translate}}&nbsp;
                             time {{element.published_time}}
                         .pre-wrap
-                            a(ng-show="!isCertification() && AttachmentsService.isAwsAttachment(element, AttachmentsService.s3EnabledForAccount)" ng-click="downloadS3Attachment(element)")
+                            a(ng-if="!isCertification() && AttachmentsService.isAwsAttachment(element, AttachmentsService.s3EnabledForAccount)" ng-click="downloadS3Attachment(element)")
                                 .fa.fa-file-image-o.file-upload
                                 span {{element.file_name}} ({{element.length ? element.length : element.size | bytes}})&nbsp;
-                            a(ng-show="isCertification() || !AttachmentsService.isAwsAttachment(element, AttachmentsService.s3EnabledForAccount)" href="{{element.link}}" download="download")
+                            a(ng-if="isCertification() || !AttachmentsService.isAwsAttachment(element, AttachmentsService.s3EnabledForAccount)" href="{{element.link}}" download="download")
                                 .fa.fa-file-image-o.file-upload
                                 span {{element.file_name}} ({{element.length ? element.length : element.size | bytes}})&nbsp;
                             span.fa.fa-close(type='button', style='cursor: pointer;', ng-click='deleteAttachment(element)')
                             div(ng-if="element.checksum") {{'SHA-256:'|translate}}&nbsp;{{element.checksum}}
-                            .description.margin-top-short(ng-show="element.description") {{element.description}}
+                            .description.margin-top-short(ng-if="element.description") {{element.description}}
 
                     article.comment.article-chat(ng-if="element.comment_type === 'chat'")
                         i.fa.fa-file-text-o
@@ -106,7 +106,7 @@ ul#tab_list.nav.nav-tabs(role="tablist")
                     article.comment.article-external-updates(ng-if="element.originating_system")
                         i.fa.fa-comments-o
                         h4.meta {{element.originating_system}}
-                            span(ng-show="element.visibility==='Partner Only'") {{' - Private'|translate}}
+                            span(ng-if="element.visibility==='Partner Only'") {{' - Private'|translate}}
                         .byline
                             author {{element.created_by}} {{'on'|translate}}&nbsp;
                             date {{element.created_date}}&nbsp;
@@ -122,8 +122,8 @@ ul#tab_list.nav.nav-tabs(role="tablist")
         #top-attachments-section
         .row
             .col-md-4
-                rha-searchbox(placeholder='"Search Attachments"', class-name='"padding-searchbox"', ng-if="AttachmentsService.originalAttachments.length > 0")
-                //- span(ng-if="AttachmentsService.originalAttachments.length > 0") Showing {{PaginationService.firstItemNumberShownOnThePage('attachmentsSection', DiscussionService.attachments.length)}}-{{PaginationService.lastItemNumberShownOnThePage('attachmentsSection', DiscussionService.attachments.length)}} of {{DiscussionService.attachments.length}} results
+                //- rha-searchbox(placeholder='"Search Attachments"', class-name='"padding-searchbox"', ng-if="AttachmentsService.originalAttachments.length > 0")
+                //- span(ng-if="AttachmentsService.originalAttachments.length > 0") ifing {{PaginationService.firstItemNumberifnOnThePage('attachmentsSection', DiscussionService.attachments.length)}}-{{PaginationService.lastItemNumberifnOnThePage('attachmentsSection', DiscussionService.attachments.length)}} of {{DiscussionService.attachments.length}} results
             .col-md-8
                 //- pagination(ng-if="attachments", current-page-number="PaginationService.attachmentsSection.currentPageNumber" datalength="DiscussionService.attachments.length", page-size="PaginationService.attachmentsSection.pageSize", set-current-page-number="setCurrentPageNumberForAS(pageNumber)", set-page-size="PaginationService.setPageSize('attachmentsSection', pageSize)")
                 //- pagination(ng-if="attachments", current-page-prop="currentPage", , datalength="DiscussionService.attachments.length", setdata="getPaginationData(pageSize, currentPage)")
@@ -140,15 +140,15 @@ ul#tab_list.nav.nav-tabs(role="tablist")
                             span {{'at'|translate}} &nbsp;
                             time {{attachment.published_time}}
                         .pre-wrap
-                            a(ng-show="!isCertification() && AttachmentsService.isAwsAttachment(attachment, AttachmentsService.s3EnabledForAccount)" ng-click="downloadS3Attachment(attachment)")
+                            a(ng-if="!isCertification() && AttachmentsService.isAwsAttachment(attachment, AttachmentsService.s3EnabledForAccount)" ng-click="downloadS3Attachment(attachment)")
                                 .fa.fa-file-image-o.file-upload
                                 span {{attachment.file_name}} ({{attachment.length ? attachment.length : attachment.size | bytes}})&nbsp;
-                            a(ng-show="isCertification() || !AttachmentsService.isAwsAttachment(attachment, AttachmentsService.s3EnabledForAccount)" href="{{attachment.link}}" download="download")
+                            a(ng-if="isCertification() || !AttachmentsService.isAwsAttachment(attachment, AttachmentsService.s3EnabledForAccount)" href="{{attachment.link}}" download="download")
                                 .fa.fa-file-image-o.file-upload
                                 span {{attachment.file_name}} ({{attachment.length ? attachment.length : attachment.size | bytes}})&nbsp;
                             span.fa.fa-close(type='button', style='cursor: pointer;', ng-click='deleteAttachment(attachment)')
                             div(ng-if='attachment.checksum') {{'SHA-256:'|translate}}&nbsp;{{attachment.checksum}}
-                            .description.margin-top-short(ng-show="attachment.description") {{attachment.description}}
+                            .description.margin-top-short(ng-if="attachment.description") {{attachment.description}}
                 #bottom-attachments-section
                 //- pagination(ng-if="attachments", current-page-number="PaginationService.attachmentsSection.currentPageNumber" datalength="DiscussionService.attachments.length", page-size="PaginationService.attachmentsSection.pageSize", set-current-page-number="setCurrentPageNumberForAS(pageNumber)", set-page-size="PaginationService.setPageSize('attachmentsSection', pageSize)")
                 //- pagination(ng-if="attachments", datalength="DiscussionService.attachments.length", setdata="getPaginationData(pageSize, currentPage)" current-page-prop="currentPage", )
