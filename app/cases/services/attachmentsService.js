@@ -335,8 +335,8 @@ export default class AttachmentsService {
                                     }
                                 };
                                 // While upload is in progress, Keep trying to refreshing Auth token after every 50 seconds if its ie11 and token is about to expire within 60 seconds.
-                                const isIE11 = !((!(window.ActiveXObject) && 'ActiveXObject' in window));
-                                const refreshTokenInterval = isIE11 ? setInterval(()=>{this.refreshTokenIfNeeded()}, 50*1000): undefined;
+                                // const isIE11 = !((!(window.ActiveXObject) && 'ActiveXObject' in window));
+                                const refreshTokenInterval = setInterval(()=>{this.refreshTokenIfNeeded()}, 50*1000);
                                 try {
                                     await hydrajs.kase.attachments.uploadAttachmentS3(
                                         caseId,
